@@ -2,8 +2,9 @@ import App from "../src/App.js";
 import { MissionUtils } from "@woowacourse/mission-utils";
 
 const mockQuestions = (inputs) => {
-  MissionUtils.Console.readLineAsync = jest.fn();
+  MissionUtils.Console.readLineAsync = jest.fn(); // 목킹을 위한 가짜 함수 제작
 
+  /** 목킹 함수에 대한 구현 */
   MissionUtils.Console.readLineAsync.mockImplementation(() => {
     const input = inputs.shift();
     return Promise.resolve(input);
