@@ -4,46 +4,54 @@ class App {
   async run() {
     MissionUtils.Console.print(await this.#calculator());
   }
+  #CUSTOM_SEPARATOR_PATTERN = /^\/\/.+\\n/;
 
   async #calculator() {
     const input = await MissionUtils.Console.readLineAsync(
       "덧셈할 문자열을 입력해주세요\n"
     );
 
-    try {
-      const numbers = this.#syntaxAnalysis(input);
+    const calcString = this.#syntaxAnalysis(input);
 
-      /** @TODO 결과를 numberes에 대한 합으로 바꾸기 */
-      return this.#printCalculateResult(numbers);
-    } catch (error) {
-      throw new Error("[ERROR]");
-    }
+    return this.#printCalculateResult(calcString);
   }
 
-  /** @param {number[]} numbers */
-  #printCalculateResult(numbers) {
-    return `결과: ${numbers.reduce((sum, current) => (sum += current), 0)}`;
+  /** @param {string[]} calcString */
+  #printCalculateResult(calcString) {
+    return `결과 : ${calcString.reduce(
+      (sum, current) => (sum += +current),
+      0
+    )}`;
   }
 
   /** @param {string} input - 구문분석을 할 문자열 */
   #syntaxAnalysis(input) {
-    const SEPARATORS = [",", '"'];
-    this.#addCustomSeparator(input, SEPARATORS);
-    /**
-     * @TODO 콜론, 쉼표, 커스텀 구분자에 대한 정규식 만들기
-     * @TODO 구문분석에 실패할 시 에러 throw
-     */
-    return [];
+    let pattern = `\,|\:`;
+    const { customSeparator, filteredInput } =
+      this.#filterCustomSeparator(input);
+
+    const regex = new RegExp(
+      customSeparator ? `${pattern}|${customSeparator}` : pattern
+    );
+
+    // -1,2,3은 에러로 처리하지만 1,-2,1은 정상 출력을 위해 첫 번째 문자를 비교
+    if (filteredInput[0].match(/[^0-9]/)) {
+      throw new Error("[ERROR]");
+    }
+
+    return filteredInput.split(regex);
   }
 
   /**
-   *  @param {string} input - 구분분석을 할 문자열
-   *  @param {string[]} separators - 구분자 모음
+   * @param {string} input - 구분분석을 할 문자열
+   * @returns {{customSeparator: string, filteredInput: string}}
    * */
-  #addCustomSeparator(input, separators) {
-    /**
-     * @TODO 커스텀 구분자를 등록하는 함수 만들기
-     */
+  #filterCustomSeparator(input) {
+    const matchArray = input.match(this.#CUSTOM_SEPARATOR_PATTERN);
+    return {
+      customSeparator: matchArray?.[0]?.replace("//", "")?.replace("\\n", ""),
+      filteredInput: matchArray ? input.split(matchArray)?.[1] : input,
+    };
   }
 }
 
