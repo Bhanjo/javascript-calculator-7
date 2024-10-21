@@ -34,12 +34,10 @@ class App {
       customSeparator ? `${pattern}|${customSeparator}` : pattern
     );
 
-    // -1,2,3은 에러로 처리하지만 1,-2,1은 정상 출력을 위해 첫 번째 문자를 비교
-    if (filteredInput[0].match(/[^0-9]/)) {
-      throw new Error("[ERROR]");
-    }
+    const numbers = filteredInput.split(regex);
+    this.#validationSyntax(numbers);
 
-    return filteredInput.split(regex);
+    return numbers;
   }
 
   /**
@@ -52,6 +50,21 @@ class App {
       customSeparator: matchArray?.[0]?.replace("//", "")?.replace("\\n", ""),
       filteredInput: matchArray ? input.split(matchArray)?.[1] : input,
     };
+  }
+
+  /** @param {string[]} input */
+  #validationSyntax(input) {
+    const ERROR_PREFIX = "[ERROR]";
+    const startWithNumber = input[0].match(/[^0-9]/) === null;
+    const allNumber = input.every((numOfChar) => numOfChar.match(/[0-9]/));
+
+    if (!startWithNumber) {
+      throw new Error(`${ERROR_PREFIX} 문자 앞에 -가 존재합니다 ${input}`);
+    }
+
+    if (!allNumber) {
+      throw new Error(`${ERROR_PREFIX} 구분 기호가 잘못되었습니다 ${input}`);
+    }
   }
 }
 

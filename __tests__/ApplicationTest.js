@@ -71,4 +71,18 @@ describe("문자열 계산기", () => {
 
     await expect(app.run()).rejects.toThrow("[ERROR]");
   });
+
+  test("구분자 중복사용", async () => {
+    const inputs = ["1,,2,3"];
+    mockQuestions(inputs);
+    const app = new App();
+    await expect(app.run()).rejects.toThrow("[ERROR]");
+  });
+
+  test("등록하지 않은 커스텀 구분자 사용", async () => {
+    const inputs = ["//q\n1,2:3q4@5"];
+    mockQuestions(inputs);
+    const app = new App();
+    await expect(app.run()).rejects.toThrow("[ERROR]");
+  });
 });
